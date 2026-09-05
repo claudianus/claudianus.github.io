@@ -1,0 +1,28 @@
+<!DOCTYPE html><html lang="ko"> <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>에이전트에게 작업을 맡기기 전에 배운 것들 — claudianus</title><meta name="description" content="작업 분해와 병렬 워커 설계에서 실패하며 배운 것들. 좋은 작업 단위는 무엇이고, 충돌은 어떻게 피하며, 언제 병렬화를 포기해야 하는가."><meta name="color-scheme" content="dark"><meta property="og:title" content="에이전트에게 작업을 맡기기 전에 배운 것들 — claudianus"><meta property="og:description" content="작업 분해와 병렬 워커 설계에서 실패하며 배운 것들. 좋은 작업 단위는 무엇이고, 충돌은 어떻게 피하며, 언제 병렬화를 포기해야 하는가."><meta property="og:type" content="website"><link rel="icon" type="image/svg+xml" href="/favicon.svg"><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap"><link rel="stylesheet" href="/global.css"></head> <body> <a class="skip-link" href="#main">본문으로 건너뛰기</a> <header class="site-header"> <div class="container"> <a class="brand" href="/" aria-label="claudianus 홈"> <svg viewBox="0 0 32 32" aria-hidden="true"> <g fill="none" stroke="#4fd8b8" stroke-width="2.2"> <circle cx="10" cy="10" r="3"></circle> <circle cx="22" cy="14" r="3"></circle> <circle cx="14" cy="23" r="3"></circle> </g> <g stroke="#4fd8b8" stroke-width="1.4" opacity="0.6"> <path d="M12.6 11.4 19.4 13.2M20.6 16.5 15.5 21.2"></path> </g> </svg>
+claudianus
+</a> <nav class="site-nav" aria-label="주요 메뉴"> <a href="/">홈</a> <a href="/blog/" aria-current="page">블로그</a> <a class="nav-github" href="https://github.com/claudianus" target="_blank" rel="noopener noreferrer"> <svg viewBox="0 0 16 16" aria-hidden="true"> <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27s1.36.09 2 .27c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8Z"></path> </svg>
+GitHub
+</a> </nav> </div> </header> <main id="main">  <article> <header class="post-header container"> <a class="back" href="/blog/">← 기록 목록</a> <h1>에이전트에게 작업을 맡기기 전에 배운 것들</h1> <div class="post-meta"> <time datetime="2026-07-18T00:00:00.000Z">2026. 07. 18.</time> <span aria-hidden="true">·</span> <span>#ai-agents #작업분해 #병렬워커</span> </div> </header> <div class="prose container"> <h2 id="작업을-분해한다는-말의-함정">작업을 “분해한다”는 말의 함정</h2>
+<p>“큰 작업을 작게 나눠서 병렬로 처리하면 빠르다” — 이 문장은 맞지만, 절반만 맞다. superliora에 작업 분해를 구현하면서 가장 먼저 배운 건 이것이다. <strong>나누기 쉬운 작업과 병렬화에 적합한 작업은 다르다.</strong></p>
+<p>한 파일을 두 워커가 동시에 고치는 상황을 상상해 보자. 두 결과 모두 완벽할 수 있지만, 병합하는 순간 충돌이 난다. 병렬화의 진짜 조건은 작업의 크기가 아니라 <strong>작업 간의 독립성</strong>이다.</p>
+<h2 id="독립성을-만드는-세-가지-방법">독립성을 만드는 세 가지 방법</h2>
+<p>실전에서 독립성을 확보한 방법 세 가지를 정리한다.</p>
+<h3 id="1-경계를-먼저-나눈다">1. 경계를 먼저 나눈다</h3>
+<p>작업을 나누기 전에, 수정 대상의 경계를 먼저 나눈다. 모듈, 디렉터리, 인터페이스가 명확하면 워커의 영역이 겹치지 않는다. 경계가 흐릿한 코드베이스에서는 병렬화보다 직렬화가 오히려 빠르다.</p>
+<h3 id="2-계약을-고정한다">2. 계약을 고정한다</h3>
+<p>병렬 워커 사이의 계약 — 함수 시그니처, 타입, 데이터 형식 — 을 작업 시작 <strong>전에</strong> 확정한다. 워커가 계약을 가정하게 되면, 나중에 모든 가정을 검증하는 비용이 병렬화로 얻은 시간을 다시 가져간다.</p>
+<h3 id="3-산출물의-형식을-지정한다">3. 산출물의 형식을 지정한다</h3>
+<p>“리팩터링해 와”는 산출물이 아니라 지시다. “테스트 통과 + 기존 API 유지 + 변경 파일 목록 포함”이 산출물이다. 산출물 형식이 명확하면 병합 단계에서 판단이 필요 없다.</p>
+<h2 id="실패-사례-완벽한-계획-무너진-병합">실패 사례: 완벽한 계획, 무너진 병합</h2>
+<p>가장 기억에 남는 실패는 이렇다. planner 세션이 6개의 완벽하게 분해된 작업을 만들었다. 워커 6개가 각자의 작업을 훌륭히 완수했다. 그런데 병합해 보니 6개의 결과가 각각 다른 유틸리티 함수를 새로 정의하고 있었다. 각자의 영역 안에서는 합리적인 결정이었지만, 시스템 전체에서는 중복이었다.</p>
+<p>이 실패에서 나온 원칙: <strong>워커의 자유도는 시스템 차원의 일관성이 보장되는 범위 안에서만 허용한다.</strong> 공용 유틸리티, 네이밍 규칙, 스타일 결정은 계약에 포함시키고, 워커는 그 안에서만 자유롭다.</p>
+<h2 id="병렬화를-포기해야-할-때">병렬화를 포기해야 할 때</h2>
+<p>마지막으로, 병렬화가 정답이 아닌 경우도 있다.</p>
+<ol>
+<li>작업 간 의존성이 파악되지 않을 때 — 충돌 비용이 병렬 이득보다 크다</li>
+<li>하나의 컨텍스트가 필요한 작업일 때 — 컨텍스트를 쪼개면 각 조각이 모두 불완전해진다</li>
+<li>디버깅이 목적일 때 — 직렬 실행은 원인 추적이 쉽다</li>
+</ol>
+<p>엔진 설계에서 배운 교훈은 이것이다. 병렬 워커는 속도의 도구가 아니라 <strong>독립성의 증명 도구</strong>다. 작업을 병렬로 나눌 수 없다면, 그 작업은 아직 제대로 이해되지 않았다는 신호다.</p> </div> </article>  </main> <footer class="site-footer"> <div class="container"> <span>© 2026 claudianus</span> <span> <a href="https://github.com/claudianus" target="_blank" rel="noopener noreferrer">
+github.com/claudianus
+</a> </span> </div> </footer> <script type="module">const t=document.querySelectorAll("[data-reveal]"),o=matchMedia("(prefers-reduced-motion: reduce)").matches;if(o)t.forEach(e=>e.classList.add("is-visible"));else{const e=new IntersectionObserver(s=>{for(const r of s)r.isIntersecting&&(r.target.classList.add("is-visible"),e.unobserve(r.target))},{threshold:.15,rootMargin:"0px 0px -5% 0px"});t.forEach(s=>e.observe(s))}</script> </body> </html>

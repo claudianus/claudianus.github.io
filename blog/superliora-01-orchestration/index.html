@@ -1,0 +1,30 @@
+<!DOCTYPE html><html lang="ko"> <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>superliora 0.1: 에이전트 엔진의 첫 오케스트레이션 — claudianus</title><meta name="description" content="세션 여러 개를 하나의 작업 흐름으로 묶는 것. superliora 0.1을 설계하며 오케스트레이션 레이어에서 무엇이 진짜 어려웠는지 돌아봅니다."><meta name="color-scheme" content="dark"><meta property="og:title" content="superliora 0.1: 에이전트 엔진의 첫 오케스트레이션 — claudianus"><meta property="og:description" content="세션 여러 개를 하나의 작업 흐름으로 묶는 것. superliora 0.1을 설계하며 오케스트레이션 레이어에서 무엇이 진짜 어려웠는지 돌아봅니다."><meta property="og:type" content="website"><link rel="icon" type="image/svg+xml" href="/favicon.svg"><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap"><link rel="stylesheet" href="/global.css"></head> <body> <a class="skip-link" href="#main">본문으로 건너뛰기</a> <header class="site-header"> <div class="container"> <a class="brand" href="/" aria-label="claudianus 홈"> <svg viewBox="0 0 32 32" aria-hidden="true"> <g fill="none" stroke="#4fd8b8" stroke-width="2.2"> <circle cx="10" cy="10" r="3"></circle> <circle cx="22" cy="14" r="3"></circle> <circle cx="14" cy="23" r="3"></circle> </g> <g stroke="#4fd8b8" stroke-width="1.4" opacity="0.6"> <path d="M12.6 11.4 19.4 13.2M20.6 16.5 15.5 21.2"></path> </g> </svg>
+claudianus
+</a> <nav class="site-nav" aria-label="주요 메뉴"> <a href="/">홈</a> <a href="/blog/" aria-current="page">블로그</a> <a class="nav-github" href="https://github.com/claudianus" target="_blank" rel="noopener noreferrer"> <svg viewBox="0 0 16 16" aria-hidden="true"> <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27s1.36.09 2 .27c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8Z"></path> </svg>
+GitHub
+</a> </nav> </div> </header> <main id="main">  <article> <header class="post-header container"> <a class="back" href="/blog/">← 기록 목록</a> <h1>superliora 0.1: 에이전트 엔진의 첫 오케스트레이션</h1> <div class="post-meta"> <time datetime="2026-08-24T00:00:00.000Z">2026. 08. 24.</time> <span aria-hidden="true">·</span> <span>#superliora #ai-agents #회고</span> </div> </header> <div class="prose container"> <h2 id="하나의-목표-여러-개의-세션">하나의 목표, 여러 개의 세션</h2>
+<p>superliora 0.1의 목표는 단순했다. <strong>목표 하나를 입력하면, 시스템이 스스로 계획하고 실행하며, 결과를 검증 가능한 형태로 돌려주는 엔진.</strong> 그런데 이 문장을 구현 가능한 구조로 바꾸는 순간 첫 번째 갈림길에 섰다. 에이전트를 하나의 거대한 루프로 만들 것인가, 아니면 여러 세션을 조율하는 오케스트레이터를 둘 것인가.</p>
+<p>둘 다 시도해 보았고, 결론부터 말하면 후자였다. 이유는 관찰 가능성 때문이었다.</p>
+<h2 id="오케스트레이터가-필요했던-이유">오케스트레이터가 필요했던 이유</h2>
+<p>단일 루프 에이전트는 만들기 쉽다. 하지만 문제가 생겼을 때 “지금 어디서 잘못되었는가”를 알기 어렵다. 프롬프트 하나가 계획, 실행, 검증을 모두 담당하면 실패 원인도 전부 한 세션의 컨텍스트 안에 묻힌다.</p>
+<p>반면 세션을 역할별로 분리하면 각 단계의 입출력이 명확해진다.</p>
+<ul>
+<li><strong>planner 세션</strong> — 목표를 받아 작업 분해안을 만든다</li>
+<li><strong>worker 세션</strong> — 분해된 작업을 실행한다</li>
+<li><strong>merge 단계</strong> — 결과를 합치고 완료 조건을 검사한다</li>
+</ul>
+<p>각 세션이 하는 일이 하나뿐이라, 로그 한 줄로도 어디가 비정상인지 좁힐 수 있다. 엔진의 신뢰성은 지능보다 <strong>분리</strong>에서 먼저 나왔다.</p>
+<h2 id="세션-오케스트레이션의-실제-난제">세션 오케스트레이션의 실제 난제</h2>
+<p>설계 문서에서는 간단해 보이는 것들이 구현에서는 계속 손을 요구했다.</p>
+<ol>
+<li><strong>컨텍스트 전달</strong> — planner의 계획을 worker에게 그대로 넘기면 컨텍스트가 비대해진다. 각 worker에는 “그 작업을 수행하는 데 필요한 최소한의 문맥”만 잘라서 전달해야 했다.</li>
+<li><strong>상태의 단일 출처</strong> — 세션이 여러 개가 되는 순간 “현재 진행 상태”가 여러 곳에 존재하게 된다. 오케스트레이터만이 상태를 갱신할 수 있도록 권한을 집중시켰다.</li>
+<li><strong>실패 격리</strong> — worker-a가 실패해도 worker-b는 계속 실행되어야 한다. 실패를 전파할 것인가, 격리할 것인가는 작업 간 의존성 그래프가 답을 내주었다.</li>
+</ol>
+<h2 id="목표-루프는-언제-멈추는가">목표 루프는 언제 멈추는가</h2>
+<p>가장 철학적인 질문은 이것이었다. <strong>목표 루프의 종료 조건은 누가 정하는가.</strong> 모델 스스로 “완료했다”고 판단하게 하면 자기 만족에 빠지기 쉽고, 사람이 매번 확인하면 자동화의 의미가 사라진다.</p>
+<p>0.1에서는 절충안을 택했다. 완료 판정은 <strong>검증 가능한 산출물의 존재</strong>를 기준으로 삼았다. 코드라면 테스트가 통과하는가, 문서라면 요구 항목이 모두 반영되었는가. “느낌상 잘 되었다”는 루프를 돌릴 근거로 인정하지 않았다.</p>
+<h2 id="다음-버전으로">다음 버전으로</h2>
+<p>0.1은 목표 → 계획 → 실행 → 검증의 최소 루프가 돌아가는 상태다. 다음에는 병렬 워커 간 충돌 처리와, 장시간 실행 세션의 체크포인트를 다룰 생각이다. 엔진이 커질수록 오케스트레이터의 일은 더 적어지고, <strong>약속(인터페이스)의 일은 더 많아질 것</strong>이다.</p> </div> </article>  </main> <footer class="site-footer"> <div class="container"> <span>© 2026 claudianus</span> <span> <a href="https://github.com/claudianus" target="_blank" rel="noopener noreferrer">
+github.com/claudianus
+</a> </span> </div> </footer> <script type="module">const t=document.querySelectorAll("[data-reveal]"),o=matchMedia("(prefers-reduced-motion: reduce)").matches;if(o)t.forEach(e=>e.classList.add("is-visible"));else{const e=new IntersectionObserver(s=>{for(const r of s)r.isIntersecting&&(r.target.classList.add("is-visible"),e.unobserve(r.target))},{threshold:.15,rootMargin:"0px 0px -5% 0px"});t.forEach(s=>e.observe(s))}</script> </body> </html>

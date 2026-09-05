@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>ryan.h.park — AI 에이전트 오케스트레이션 개발자</title>
+<meta name="description" content="에이전트 오케스트레이션 도구 SuperLiora를 만드는 개발자 ryan.h.park (claudianus)의 포트폴리오" />
+<link rel="preconnect" href="https://cdn.jsdelivr.net" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap" />
+<style>
+  :root {
+    --bg: #0a0e15;
+    --bg-panel: #101623;
+    --bg-panel-hover: #141c2d;
+    --border: #1e293b;
+    --text: #e2e8f0;
+    --text-muted: #8b98ad;
+    --accent: #5eead4;
+    --accent-dim: rgba(94, 234, 212, 0.12);
+    --mono: 'JetBrains Mono', ui-monospace, monospace;
+    --sans: 'Pretendard Variable', Pretendard, -apple-system, sans-serif;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    line-height: 1.7;
+    -webkit-font-smoothing: antialiased;
+  }
+  ::selection { background: rgba(94, 234, 212, 0.25); }
+
+  .wrap { max-width: 920px; margin: 0 auto; padding: 0 24px; }
+
+  a { color: var(--accent); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+
+  /* ---------- header ---------- */
+  header {
+    position: sticky; top: 0; z-index: 10;
+    backdrop-filter: blur(12px);
+    background: rgba(10, 14, 21, 0.8);
+    border-bottom: 1px solid var(--border);
+  }
+  header .wrap { display: flex; align-items: center; justify-content: space-between; height: 60px; }
+  .logo { font-family: var(--mono); font-size: 14px; color: var(--text); }
+  .logo span { color: var(--accent); }
+  nav { display: flex; gap: 24px; font-size: 14px; }
+  nav a { color: var(--text-muted); transition: color .2s; }
+  nav a:hover { color: var(--text); text-decoration: none; }
+
+  /* ---------- hero ---------- */
+  .hero { padding: 110px 0 90px; }
+  .prompt {
+    font-family: var(--mono); font-size: 13px; color: var(--text-muted);
+    margin-bottom: 20px; min-height: 20px;
+  }
+  .prompt .caret { display: inline-block; width: 8px; height: 15px; background: var(--accent); vertical-align: text-bottom; animation: blink 1s step-end infinite; }
+  @keyframes blink { 50% { opacity: 0; } }
+  .hero h1 {
+    font-size: clamp(30px, 5vw, 44px); font-weight: 800; line-height: 1.25;
+    letter-spacing: -0.02em; margin-bottom: 18px;
+  }
+  .hero h1 em { font-style: normal; color: var(--accent); }
+  .hero p.lead { font-size: 17px; color: var(--text-muted); max-width: 560px; margin-bottom: 36px; }
+  .cta { display: flex; gap: 14px; flex-wrap: wrap; }
+  .btn {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-size: 14px; font-weight: 600; padding: 11px 22px; border-radius: 8px;
+    transition: transform .15s, background .2s, border-color .2s;
+  }
+  .btn:hover { text-decoration: none; transform: translateY(-2px); }
+  .btn-primary { background: var(--accent); color: #06281f; }
+  .btn-primary:hover { background: #7ff5e2; }
+  .btn-ghost { border: 1px solid var(--border); color: var(--text); background: var(--bg-panel); }
+  .btn-ghost:hover { border-color: #33415c; }
+
+  /* ---------- sections ---------- */
+  section { padding: 72px 0; border-top: 1px solid var(--border); }
+  .sec-label {
+    font-family: var(--mono); font-size: 12px; color: var(--accent);
+    letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 8px;
+  }
+  .sec-title { font-size: 26px; font-weight: 800; letter-spacing: -0.01em; margin-bottom: 36px; }
+
+  /* about */
+  .about-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+  .about-card {
+    background: var(--bg-panel); border: 1px solid var(--border); border-radius: 12px;
+    padding: 24px 22px;
+  }
+  .about-card .ico { font-size: 22px; margin-bottom: 14px; display: block; }
+  .about-card h3 { font-size: 15px; font-weight: 700; margin-bottom: 8px; }
+  .about-card p { font-size: 14px; color: var(--text-muted); }
+
+  /* projects */
+  .proj-featured {
+    background: var(--bg-panel); border: 1px solid var(--border); border-radius: 14px;
+    padding: 34px 32px; margin-bottom: 16px;
+  }
+  .proj-featured:hover { border-color: #2d3e5c; background: var(--bg-panel-hover); }
+  .tag {
+    display: inline-block; font-family: var(--mono); font-size: 11px; color: var(--accent);
+    background: var(--accent-dim); border: 1px solid rgba(94, 234, 212, 0.25);
+    padding: 3px 10px; border-radius: 99px; margin-bottom: 16px;
+  }
+  .proj-featured h3 { font-size: 22px; font-weight: 800; margin-bottom: 10px; }
+  .proj-featured > p { color: var(--text-muted); font-size: 15px; margin-bottom: 22px; max-width: 640px; }
+  .feat-list { list-style: none; display: grid; grid-template-columns: 1fr 1fr; gap: 10px 24px; margin-bottom: 26px; }
+  .feat-list li { font-size: 14px; color: var(--text); display: flex; gap: 10px; }
+  .feat-list li b { color: var(--accent); font-weight: 600; }
+  .stack { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 24px; }
+  .stack span {
+    font-family: var(--mono); font-size: 12px; color: var(--text-muted);
+    border: 1px solid var(--border); padding: 4px 10px; border-radius: 6px;
+  }
+  .links { display: flex; gap: 20px; font-size: 14px; font-weight: 600; }
+
+  .proj-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .proj-card {
+    background: var(--bg-panel); border: 1px solid var(--border); border-radius: 12px;
+    padding: 26px 24px; display: flex; flex-direction: column;
+    transition: border-color .2s, background .2s;
+  }
+  .proj-card:hover { border-color: #2d3e5c; background: var(--bg-panel-hover); }
+  .proj-card h3 { font-size: 17px; font-weight: 700; margin-bottom: 8px; }
+  .proj-card p { font-size: 14px; color: var(--text-muted); margin-bottom: 18px; flex: 1; }
+  .proj-card .links { font-size: 13px; }
+
+  /* skills */
+  .skills-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+  .skill-col { background: var(--bg-panel); border: 1px solid var(--border); border-radius: 12px; padding: 24px 22px; }
+  .skill-col h3 { font-family: var(--mono); font-size: 12px; color: var(--accent); letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 16px; }
+  .skill-col ul { list-style: none; }
+  .skill-col li { font-size: 14px; padding: 6px 0; border-bottom: 1px dashed var(--border); color: var(--text-muted); }
+  .skill-col li:last-child { border-bottom: none; }
+  .skill-col li b { color: var(--text); font-weight: 600; display: block; }
+
+  /* contact */
+  .contact-box {
+    background: var(--bg-panel); border: 1px solid var(--border); border-radius: 14px;
+    padding: 40px 36px; text-align: center;
+  }
+  .contact-box p { color: var(--text-muted); font-size: 15px; margin-bottom: 24px; }
+
+  footer { padding: 40px 0 56px; border-top: 1px solid var(--border); }
+  footer .wrap {
+    display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;
+    font-size: 13px; color: var(--text-muted);
+  }
+  footer .mono { font-family: var(--mono); font-size: 12px; }
+
+  /* reveal */
+  .reveal { opacity: 0; transform: translateY(18px); transition: opacity .6s ease, transform .6s ease; }
+  .reveal.on { opacity: 1; transform: none; }
+  @media (prefers-reduced-motion: reduce) {
+    .reveal { opacity: 1; transform: none; transition: none; }
+    html { scroll-behavior: auto; }
+  }
+
+  /* responsive */
+  @media (max-width: 760px) {
+    .about-grid, .skills-grid, .proj-grid, .feat-list { grid-template-columns: 1fr; }
+    .hero { padding: 72px 0 60px; }
+    nav { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <div class="logo"><span>&gt;_</span> claudianus</div>
+    <nav>
+      <a href="#about">소개</a>
+      <a href="#projects">프로젝트</a>
+      <a href="#skills">스택</a>
+      <a href="https://github.com/claudianus" target="_blank" rel="noopener">GitHub ↗</a>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <!-- hero -->
+  <section class="hero" style="border-top:none;">
+    <div class="prompt" id="prompt">ryan@modumaru:~$</div>
+    <h1>코드가 아니라,<br /><em>에이전트가 일하는 방식</em>을 설계합니다.</h1>
+    <p class="lead">
+      AI 에이전트 오케스트레이션 도구 <b style="color:var(--text)">SuperLiora</b>를 만들고,
+      에이전트와 함께 웹 게임과 서비스를 기획부터 배포까지 완성합니다.
+      주장 대신 동작하는 코드로 증명합니다.
+    </p>
+    <div class="cta">
+      <a class="btn btn-primary" href="#projects">프로젝트 보기</a>
+      <a class="btn btn-ghost" href="https://github.com/claudianus" target="_blank" rel="noopener">GitHub ↗</a>
+    </div>
+  </section>
+
+  <!-- about -->
+  <section id="about">
+    <div class="sec-label reveal">01 · About</div>
+    <h2 class="sec-title reveal">저는 이런 개발자입니다</h2>
+    <div class="about-grid">
+      <div class="about-card reveal">
+        <span class="ico">🛠️</span>
+        <h3>AI로 개발하는 과정을 도구로 만듭니다</h3>
+        <p>세션 오케스트레이션, git worktree 기반 병렬 작업, 멀티 LLM 프로바이더 폴백 — 에이전트 개발 워크플로를 직접 설계하고 구현했습니다.</p>
+      </div>
+      <div class="about-card reveal">
+        <span class="ico">🚀</span>
+        <h3>만들고, 배포까지 마칩니다</h3>
+        <p>에이전트와 협업해 웹 게임 4종과 서비스 데모를 GitHub Pages에 배포했습니다. 끝까지 완성하지 못한 프로젝트는 포트폴리오에 넣지 않습니다.</p>
+      </div>
+      <div class="about-card reveal">
+        <span class="ico">📐</span>
+        <h3>경험을 규칙으로 남깁니다</h3>
+        <p>한국어 UX 라이팅 원칙을 에이전트 스킬과 린터로 코드화했습니다. 좋은 에이전트 시스템은 좋은 관찰 가능성에서 나온다고 믿습니다.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- projects -->
+  <section id="projects">
+    <div class="sec-label reveal">02 · Projects</div>
+    <h2 class="sec-title reveal">주요 프로젝트</h2>
+
+    <div class="proj-featured reveal">
+      <span class="tag">AI Agent Engine</span>
+      <h3>SuperLiora</h3>
+      <p>목표 하나를 받아 계획 · 실행 · 검증까지 스스로 돌아가는 에이전트 오케스트레이션 TUI. 컨트롤 플레인에서 목표를 말하면, 구현은 격리된 git worktree Job으로 병렬 실행되어 검증 통과분만 로컬로 반영됩니다.</p>
+      <ul class="feat-list">
+        <li><b>01</b> 세션 오케스트레이션 — 여러 에이전트 세션을 하나의 작업 흐름으로 조율</li>
+        <li><b>02</b> 병렬 Job — 큰 목표를 독립 작업으로 분해해 worktree에서 동시 실행</li>
+        <li><b>03</b> 멀티 프로바이더 — Groq · Mistral · xAI · Cerebras 등 폴백과 재시도로 세션 유지</li>
+        <li><b>04</b> 관찰 가능성 — Job 진행 상태와 로그를 실시간 추적</li>
+      </ul>
+      <div class="stack"><span>TypeScript</span><span>Node.js</span><span>git worktree</span><span>TUI</span><span>GitHub Actions</span></div>
+      <div class="links">
+        <a href="https://github.com/claudianus/superliora" target="_blank" rel="noopener">GitHub ↗</a>
+        <a href="https://claudianus.github.io/superliora/" target="_blank" rel="noopener">문서 사이트 ↗</a>
+      </div>
+    </div>
+
+    <div class="proj-grid">
+      <div class="proj-card reveal">
+        <span class="tag">Web Game</span>
+        <h3>웹 게임 시리즈</h3>
+        <p>시드 기반 무한 맵 로그라이트 <b>neon-surge</b>(PixiJS), 절차적 생성 서바이벌 <b>dopamine-survivor</b>, 60초 아케이드 <b>neon-pop-nova</b>. 전부 브라우저에서 바로 플레이 가능한 상태로 배포했습니다.</p>
+        <div class="links">
+          <a href="https://claudianus.github.io/neon-surge/" target="_blank" rel="noopener">neon-surge 플레이 ↗</a>
+          <a href="https://github.com/claudianus/dopamine-survivor" target="_blank" rel="noopener">GitHub ↗</a>
+        </div>
+      </div>
+      <div class="proj-card reveal">
+        <span class="tag">AI · Web Service</span>
+        <h3>서비스 데모 포트폴리오</h3>
+        <p>예약/신청 플로우, 업무 관리 대시보드, AI 문의 자동분류를 포함한 수익형 웹서비스 구조 검증용 데모. 실서비스를 전제로 한 데이터 흐름과 화면을 구현했습니다.</p>
+        <div class="links">
+          <a href="https://github.com/claudianus/service-demo-portfolio" target="_blank" rel="noopener">GitHub ↗</a>
+        </div>
+      </div>
+      <div class="proj-card reveal">
+        <span class="tag">Agent Skill</span>
+        <h3>한국어 에이전트 스킬</h3>
+        <p>토스 스타일 UX 라이팅 규칙을 에이전트 스킬 + 린터(<b>toss-ux-writing-skill</b>)로, 기업 브랜드 보이스를 스킬(<b>joonganggroup-corporate-voice-skill</b>)로 구현. 규칙을 프롬프트가 아닌 검증 가능한 형태로 남겼습니다.</p>
+        <div class="links">
+          <a href="https://github.com/claudianus/toss-ux-writing-skill" target="_blank" rel="noopener">GitHub ↗</a>
+        </div>
+      </div>
+      <div class="proj-card reveal">
+        <span class="tag">Tooling</span>
+        <h3>개발자 유틸리티</h3>
+        <p>macOS 앱 캐시 정리 도구 <b>folio</b>(Go), PC방용 원클릭 다크모드 <b>oneclick-dark</b>(PowerShell), stealth 브라우저 런처 등 작은 문제를 해결하는 도구를 꾸준히 만들고 공개합니다.</p>
+        <div class="links">
+          <a href="https://github.com/claudianus/folio" target="_blank" rel="noopener">folio ↗</a>
+          <a href="https://github.com/claudianus?tab=repositories" target="_blank" rel="noopener">전체 리포 ↗</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- skills -->
+  <section id="skills">
+    <div class="sec-label reveal">03 · Stack</div>
+    <h2 class="sec-title reveal">기술 스택</h2>
+    <div class="skills-grid">
+      <div class="skill-col reveal">
+        <h3>Language</h3>
+        <ul>
+          <li><b>TypeScript / JavaScript</b>주력 — SuperLiora, 게임, 데모 전반</li>
+          <li><b>Python</b>에이전트 스킬 · 린터 구현</li>
+          <li><b>Go</b>CLI 유틸리티</li>
+          <li><b>HTML / CSS</b>의존성 없는 UI 구현</li>
+        </ul>
+      </div>
+      <div class="skill-col reveal">
+        <h3>AI / LLM</h3>
+        <ul>
+          <li><b>에이전트 오케스트레이션</b>세션 조율, 작업 분해, 병렬 실행 설계</li>
+          <li><b>멀티 프로바이더 LLM API</b>Groq · Mistral · Together · xAI · Cerebras 연동</li>
+          <li><b>에이전트 스킬 설계</b>브랜드 보이스 · UX 라이팅 규칙 코드화</li>
+        </ul>
+      </div>
+      <div class="skill-col reveal">
+        <h3>Platform / Tool</h3>
+        <ul>
+          <li><b>Node.js · PixiJS</b>런타임과 2D 렌더링</li>
+          <li><b>Git · GitHub Actions</b>worktree 워크플로, CI</li>
+          <li><b>Shell / PowerShell</b>크로스플랫폼 인스톨러 작성</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- contact -->
+  <section id="contact">
+    <div class="sec-label reveal">04 · Contact</div>
+    <h2 class="sec-title reveal">이야기를 나눠요</h2>
+    <div class="contact-box reveal">
+      <p>
+        AI 에이전트 시스템, 바이브코딩 워크플로, 웹 게임 — 이런 주제의 협업과 채용 제안을 기다립니다.
+        가장 빠른 연락 경로는 GitHub입니다.
+      </p>
+      <a class="btn btn-primary" href="https://github.com/claudianus" target="_blank" rel="noopener">github.com/claudianus ↗</a>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <div>© 2026 ryan.h.park (claudianus)</div>
+    <div class="mono">built without frameworks — HTML · CSS · vanilla JS</div>
+  </div>
+</footer>
+
+<script>
+  // hero prompt typing
+  (function () {
+    var el = document.getElementById('prompt');
+    var full = 'ryan@modumaru:~$ whoami';
+    var i = 0;
+    function step() {
+      if (i <= full.length) {
+        el.innerHTML = full.slice(0, i) + '<span class="caret"></span>';
+        i++;
+        setTimeout(step, 45);
+      }
+    }
+    if (!matchMedia('(prefers-reduced-motion: reduce)').matches) { step(); }
+    else { el.textContent = full; }
+  })();
+
+  // reveal on scroll
+  (function () {
+    var obs = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) {
+        if (e.isIntersecting) { e.target.classList.add('on'); obs.unobserve(e.target); }
+      });
+    }, { threshold: 0.12 });
+    document.querySelectorAll('.reveal').forEach(function (el) { obs.observe(el); });
+  })();
+</script>
+</body>
+</html>
